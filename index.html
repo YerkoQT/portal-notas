@@ -249,14 +249,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 /* ── FILE UPLOAD ZONE ── */
 .upload-zone{
-  border:2px dashed var(--border);border-radius:8px;padding:2rem;
-  text-align:center;cursor:pointer;transition:all .2s;
+  border:2px dashed var(--border);border-radius:8px;padding:1.5rem 1rem;
+  text-align:center;cursor:pointer;transition:all .2s;position:relative;
 }
 .upload-zone:hover,.upload-zone.drag{border-color:var(--navy);background:var(--bg3);}
-.upload-zone input{display:none;}
+/* Input visible y clickeable en toda la zona */
+.upload-zone input[type=file]{
+  position:absolute;inset:0;width:100%;height:100%;
+  opacity:0;cursor:pointer;z-index:2;
+}
 .upload-icon{font-size:2rem;margin-bottom:.5rem;}
 .upload-txt{font-size:.8rem;color:var(--muted);}
 .upload-txt strong{color:var(--navy);}
+/* Botón visible para móvil */
+.upload-btn{
+  display:inline-block;margin-top:.7rem;padding:.5rem 1.2rem;
+  background:var(--navy);color:#fff;border-radius:6px;font-size:.78rem;
+  font-weight:600;pointer-events:none;
+}
 
 /* ── FILE LIST ── */
 .file-item{
@@ -301,6 +311,46 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .empty{text-align:center;padding:2.5rem 1rem;color:var(--muted);}
 .empty-icon{font-size:2.5rem;margin-bottom:.6rem;display:block;}
 .empty-txt{font-size:.82rem;line-height:1.8;}
+
+/* ── PDF VIEWER ── */
+.pdf-viewer-wrap{
+  width:100%;border:1px solid var(--border);border-radius:8px;
+  overflow:hidden;background:#525659;
+}
+.pdf-viewer-wrap iframe{
+  width:100%;height:70vh;border:none;display:block;
+}
+.pdf-toolbar{
+  background:var(--navy);padding:.5rem .9rem;
+  display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+}
+.pdf-toolbar span{color:#fff;font-size:.75rem;font-family:'DM Mono',monospace;flex:1;}
+
+/* ── PYTHON RUNNER ── */
+.py-editor{
+  width:100%;min-height:180px;background:#1E1E2E;color:#cdd9e5;
+  font-family:'DM Mono',monospace;font-size:.78rem;
+  border:1px solid #444;border-radius:6px 6px 0 0;padding:.8rem;
+  resize:vertical;outline:none;
+}
+.py-output{
+  background:#0d1117;color:#7ee787;font-family:'DM Mono',monospace;
+  font-size:.75rem;padding:.75rem;border:1px solid #444;border-top:none;
+  border-radius:0 0 6px 6px;min-height:60px;max-height:240px;
+  overflow-y:auto;white-space:pre-wrap;word-break:break-all;
+}
+.py-output.error{color:#ff7b72;}
+.py-toolbar{
+  display:flex;gap:.5rem;padding:.5rem 0;flex-wrap:wrap;align-items:center;
+}
+
+/* ── GH UPLOAD STATUS ── */
+.gh-upload-status{
+  display:flex;align-items:center;gap:.5rem;font-size:.68rem;
+  color:var(--muted);padding:.4rem .7rem;background:var(--bg3);
+  border-radius:5px;margin-top:.4rem;
+}
+.gh-dot-sm{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;}
 
 /* ── RESPONSIVE ── */
 @media(max-width:580px){
@@ -422,31 +472,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </p>
 
     <div class="upload-zone" id="upload-zone-pdf"
-      onclick="document.getElementById('file-pdf').click()"
       ondragover="dragOver(event,'upload-zone-pdf')"
       ondragleave="dragLeave(event,'upload-zone-pdf')"
       ondrop="dropFile(event,'pdf')">
       <input type="file" id="file-pdf" accept=".pdf" onchange="addFile(this,'pdf')">
       <div class="upload-icon">📄</div>
-      <div class="upload-txt"><strong>Clic o arrastra</strong> para subir el PDF</div>
+      <div class="upload-txt"><strong>Seleccionar PDF</strong><br>o arrastra el archivo aquí</div>
+      <div class="upload-btn">📂 Elegir PDF</div>
     </div>
 
     <div id="pdf-list" style="margin-top:.6rem;"></div>
 
     <div class="upload-zone" id="upload-zone-py" style="margin-top:.7rem;"
-      onclick="document.getElementById('file-py').click()"
       ondragover="dragOver(event,'upload-zone-py')"
       ondragleave="dragLeave(event,'upload-zone-py')"
       ondrop="dropFile(event,'py')">
       <input type="file" id="file-py" accept=".py,.ipynb" onchange="addFile(this,'py')">
       <div class="upload-icon">🐍</div>
-      <div class="upload-txt"><strong>Clic o arrastra</strong> para subir el archivo Python (.py / .ipynb)</div>
+      <div class="upload-txt"><strong>Seleccionar Python</strong><br>o arrastra el archivo aquí (.py / .ipynb)</div>
+      <div class="upload-btn">📂 Elegir .py</div>
     </div>
 
     <div id="py-list" style="margin-top:.6rem;"></div>
   </div>
 
   <div id="tarea-msg" class="msg"></div>
+  <div class="gh-upload-status" id="gh-tarea-status" style="display:none">
+    <div class="gh-dot-sm" id="gh-tarea-dot"></div>
+    <span id="gh-tarea-txt"></span>
+  </div>
   <div class="btn-row">
     <button class="btn primary" onclick="submitTarea()">📤 Entregar Tarea</button>
   </div>
@@ -528,9 +582,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="card">
         <div class="card-title">🔄 Sincronizar desde GitHub Issues</div>
         <p style="font-size:.78rem;color:var(--muted);margin-bottom:.9rem;line-height:1.7;">
-          Lee los issues con label <code style="background:var(--bg3);padding:.1em .4em;border-radius:3px">quiz-nota</code>
-          de todos los repositorios configurados y registra automáticamente las notas de cada estudiante.
+          Lee los issues con labels <code style="background:var(--bg3);padding:.1em .4em;border-radius:3px">quiz-nota</code>
+          de todos los repositorios configurados y registra automáticamente las notas de cada quiz.
           Los quizzes de Misiles, Python, RK4, Series y cualquier quiz futuro quedan unificados aquí.
+          Las <strong>tareas entregadas</strong> (label <code style="background:var(--bg3);padding:.1em .4em;border-radius:3px">tarea-entrega</code>)
+          también se importan automáticamente.
         </p>
 
         <div class="fld">
@@ -606,17 +662,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 <!-- ── MODAL VER NOTA TAREA ── -->
 <div class="modal-overlay hidden" id="modal-calificar-tarea">
-  <div class="modal">
+  <div class="modal" style="width:min(96vw,780px);max-height:94vh">
     <button class="modal-close" onclick="closeModal('modal-calificar-tarea')">✕</button>
     <div class="modal-title" id="mct-title">Calificar Tarea</div>
-    <div id="mct-files"></div>
-    <div class="fld" style="margin-top:1rem;">
-      <label>Nota (0 – 100)</label>
-      <input id="mct-nota" type="number" min="0" max="100" placeholder="Ej: 85">
-    </div>
-    <div class="fld">
-      <label>Comentario (opcional)</label>
-      <textarea id="mct-comentario" rows="3" placeholder="Observaciones…"></textarea>
+
+    <!-- Tabs PDF / Python -->
+    <div id="mct-tabs" style="display:flex;gap:.4rem;margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:.5rem;flex-wrap:wrap;"></div>
+
+    <!-- Viewer area -->
+    <div id="mct-viewer" style="margin-bottom:1rem;"></div>
+
+    <!-- Calificación -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+      <div class="fld">
+        <label>Nota (0 – 100)</label>
+        <input id="mct-nota" type="number" min="0" max="100" placeholder="Ej: 85">
+      </div>
+      <div class="fld">
+        <label>Comentario para el estudiante</label>
+        <input id="mct-comentario" type="text" placeholder="Observaciones…">
+      </div>
     </div>
     <div class="btn-row">
       <button class="btn primary" onclick="saveTareaNota()">💾 Guardar nota</button>
@@ -882,21 +947,26 @@ let pendingFiles={pdf:null,py:null};
 
 function addFile(inp,type){
   const file=inp.files[0]; if(!file) return;
-  if(file.size>10*1024*1024){ alert('El archivo supera 10 MB.'); return; }
+  if(file.size>10*1024*1024){ alert('El archivo supera 10 MB.'); inp.value=''; return; }
   pendingFiles[type]={name:file.name,size:file.size,file};
   renderFilePreview(type);
+  // Hide upload zone, show preview
+  const zone=document.getElementById('upload-zone-'+type);
+  if(zone) zone.style.display='none';
 }
 
 function renderFilePreview(type){
   const list=document.getElementById(type+'-list');
   const f=pendingFiles[type];
   if(!f){ list.innerHTML=''; return; }
-  const sz=(f.size/1024).toFixed(1);
-  list.innerHTML=`<div class="file-item">
+  const sz=f.size>1024*1024?(f.size/1024/1024).toFixed(1)+' MB':(f.size/1024).toFixed(1)+' KB';
+  list.innerHTML=`<div class="file-item" style="background:#eef8f3;border:1px solid var(--green);border-radius:8px;padding:.75rem 1rem">
     <span class="file-icon">${type==='pdf'?'📄':'🐍'}</span>
-    <span class="file-name">${f.name}</span>
-    <span class="file-size">${sz} KB</span>
-    <button class="file-del" onclick="removeFile('${type}')">✕</button>
+    <div style="flex:1;overflow:hidden">
+      <div class="file-name" style="color:var(--green)">✓ ${f.name}</div>
+      <div class="file-size">${sz} · listo para entregar</div>
+    </div>
+    <button class="file-del" onclick="removeFile('${type}')" style="color:var(--red);font-size:1.1rem;padding:.2rem .5rem">✕</button>
   </div>`;
 }
 
@@ -904,6 +974,9 @@ function removeFile(type){
   pendingFiles[type]=null;
   document.getElementById(type+'-list').innerHTML='';
   document.getElementById('file-'+type).value='';
+  // Show upload zone again
+  const zone=document.getElementById('upload-zone-'+type);
+  if(zone) zone.style.display='';
 }
 
 function dragOver(e,id){ e.preventDefault(); document.getElementById(id).classList.add('drag'); }
@@ -933,28 +1006,114 @@ function submitTarea(){
   const arr=getTareas();
   const date=new Date().toLocaleString('es-BO');
 
+  let filesReady=0, filesTotal=(pendingFiles.pdf?1:0)+(pendingFiles.py?1:0);
+  const tEntries=[];
+
   const saveOne=(type,f)=>{
     if(!f) return;
     const reader=new FileReader();
-    reader.onload=e=>{
+    reader.onload=async e=>{
       const id=`${ci}_${tarea}_${type}_${Date.now()}`;
-      try{ saveFile(id,{name:f.name,data:e.target.result,type}); } catch(err){ console.warn('Storage full',err); }
-      arr.push({id,ci,name,tarea,filename:f.name,type,date,nota:undefined,comentario:''});
+      const fileData=e.target.result;
+      try{ saveFile(id,{name:f.name,data:fileData,type}); } catch(err){ console.warn('Storage full',err); }
+      const entry={id,ci,name,tarea,filename:f.name,type,date,nota:undefined,comentario:'',ghIssue:null};
+      arr.push(entry);
+      tEntries.push({entry,fileData,f});
       saveTareas(arr);
+      filesReady++;
+      if(filesReady===filesTotal){
+        // Show success
+        msgEl.className='msg ok';
+        msgEl.textContent='✓ Tarea guardada localmente.';
+        // Push to GitHub if token available
+        const tok=ghToken(); const repo=ghRepo();
+        if(tok&&repo){
+          const statusEl=document.getElementById('gh-tarea-status');
+          const dotEl=document.getElementById('gh-tarea-dot');
+          const txtEl=document.getElementById('gh-tarea-txt');
+          statusEl.style.display='flex';
+          dotEl.style.background='#fbbf24';
+          txtEl.textContent='Enviando a GitHub Issues…';
+          try{
+            for(const {entry,fileData,f} of tEntries){
+              const isLarge = f.file.size > 500*1024;
+              const filePreview = entry.type==='py'
+                ? await readTextFile(f.file)
+                : (isLarge ? '(PDF grande — descargar desde portal)' : '');
+
+              // Build body using string concatenation to avoid nested backtick issues
+              const NL = '\n';
+              const jsonData = JSON.stringify({ci,name,tarea:entry.tarea,filename:f.name,type:entry.type,date,id:entry.id});
+              const codeBlock = entry.type==='py'
+                ? ('### Codigo Python' + NL + '```python' + NL + filePreview + NL + '```')
+                : ('> PDF adjunto: ' + f.name + ' (' + (f.file.size/1024).toFixed(1) + ' KB)');
+
+              const bodyLines = [
+                '## Entrega de Tarea — ' + entry.tarea, '',
+                '| Campo | Valor |', '|---|---|',
+                '| **Nombre** | ' + name + ' |',
+                '| **CI** | ' + ci + ' |',
+                '| **Tarea** | ' + entry.tarea + ' |',
+                '| **Archivo** | ' + f.name + ' |',
+                '| **Tipo** | ' + entry.type.toUpperCase() + ' |',
+                '| **Fecha** | ' + date + ' |',
+                '| **ID** | ' + entry.id + ' |', '',
+                codeBlock, '',
+                '```json', jsonData, '```'
+              ];
+              const body = bodyLines.join(NL);
+              const title = '[Tarea] ' + name + ' · CI:' + ci + ' · ' + entry.tarea + ' · ' + entry.type.toUpperCase() + ' · ' + date;
+
+              const r = await fetch('https://api.github.com/repos/' + repo + '/issues', {
+                method: 'POST',
+                headers: {
+                  'Authorization': 'Bearer ' + tok,
+                  'Accept': 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({title, body, labels:['tarea-entrega']})
+              });
+              if(r.ok){
+                const d = await r.json();
+                const idx = getTareas().findIndex(t=>t.id===entry.id);
+                if(idx>-1){ const ta=getTareas(); ta[idx].ghIssue=d.number; saveTareas(ta); }
+                dotEl.style.background = '#2D6A4F';
+                dotEl.style.animation = 'none';
+                txtEl.innerHTML = '✓ Issue #' + d.number + ' — <a href="' + d.html_url + '" target="_blank" style="color:var(--navy)">Ver en GitHub →</a>';
+              } else {
+                throw new Error('HTTP ' + r.status);
+              }
+            }
+          } catch(err){
+            dotEl.style.background = '#E63946';
+            txtEl.textContent = 'Error GitHub: ' + err.message;
+          }
+        }
+        pendingFiles={pdf:null,py:null};
+        ['pdf','py'].forEach(t=>{
+          document.getElementById(t+'-list').innerHTML='';
+          document.getElementById('file-'+t).value='';
+          const zone=document.getElementById('upload-zone-'+t);
+          if(zone) zone.style.display='';
+        });
+        renderMisEntregas();
+      }
     };
     reader.readAsDataURL(f.file);
   };
 
   saveOne('pdf',pendingFiles.pdf);
   saveOne('py',pendingFiles.py);
+}
 
-  setTimeout(()=>{
-    msgEl.className='msg ok';
-    msgEl.textContent='✓ Tarea entregada correctamente.';
-    pendingFiles={pdf:null,py:null};
-    ['pdf','py'].forEach(t=>{ document.getElementById(t+'-list').innerHTML=''; document.getElementById('file-'+t).value=''; });
-    renderMisEntregas();
-  },400);
+// Read text file helper
+function readTextFile(file){
+  return new Promise(res=>{
+    const r=new FileReader();
+    r.onload=e=>res(e.target.result.slice(0,8000)); // max 8KB of code
+    r.readAsText(file);
+  });
 }
 
 function renderMisEntregas(){
@@ -1240,45 +1399,187 @@ function renderTareas(){
   let tareas=getTareas().filter(t=>
     (t.name.toLowerCase().includes(q)||t.ci.includes(q)||t.tarea.toLowerCase().includes(q)) &&
     (!ft||t.tarea===ft)
-  ).slice().reverse();
+  );
 
   const el=document.getElementById('lista-tareas');
   if(!tareas.length){ el.innerHTML='<div class="empty"><span class="empty-icon">📭</span><div class="empty-txt">No hay tareas entregadas.</div></div>'; return; }
 
-  el.innerHTML=tareas.map(t=>{
-    const notaStr=t.nota!==undefined?t.nota.toFixed(1)+'%':'Pendiente';
-    const cls=t.nota===undefined?'pending':t.nota>=PASS_MIN?'pass':'fail';
-    const icon=t.type==='pdf'?'📄':'🐍';
+  // Group by student+tarea
+  const groups={};
+  tareas.forEach(t=>{
+    const key=`${t.ci}__${t.tarea}`;
+    if(!groups[key]) groups[key]={ci:t.ci,name:t.name,tarea:t.tarea,files:[],date:t.date};
+    groups[key].files.push(t);
+  });
+
+  el.innerHTML=Object.values(groups).sort((a,b)=>b.date.localeCompare(a.date)).map(g=>{
+    const nota=g.files.find(f=>f.nota!==undefined)?.nota;
+    const notaStr=nota!==undefined?nota.toFixed(1)+'%':'⏳ Pendiente';
+    const cls=nota===undefined?'pending':nota>=PASS_MIN?'pass':'fail';
+    const icons=g.files.map(f=>f.type==='pdf'?'📄':'🐍').join(' ');
+    const fileNames=g.files.map(f=>`<span style="font-size:.68rem;background:var(--bg3);padding:.1rem .4rem;border-radius:3px">${f.type==='pdf'?'📄':'🐍'} ${f.filename}</span>`).join(' ');
+    const ghLinks=g.files.filter(f=>f.ghIssue).map(f=>`<a href="https://github.com/${ghRepo()}/issues/${f.ghIssue}" target="_blank" style="font-size:.65rem;color:var(--navy)">#${f.ghIssue}</a>`).join(' ');
     return `<div class="tarea-card">
-      <span class="tarea-icon">${icon}</span>
+      <span class="tarea-icon" style="font-size:1.3rem">${icons}</span>
       <div class="tarea-info">
-        <div class="tarea-name">${t.tarea} · ${t.name}</div>
-        <div class="tarea-meta">CI: ${t.ci} · ${t.filename} · ${t.date}</div>
-        ${t.comentario?`<div class="tarea-meta" style="color:var(--navy)">💬 ${t.comentario}</div>`:''}
+        <div class="tarea-name">${g.tarea} · ${g.name}</div>
+        <div class="tarea-meta">CI: ${g.ci} · ${g.date} ${ghLinks?'· GH:'+ghLinks:''}</div>
+        <div style="margin-top:.3rem;display:flex;gap:.3rem;flex-wrap:wrap">${fileNames}</div>
+        ${g.files.find(f=>f.comentario)?`<div class="tarea-meta" style="color:var(--navy);margin-top:.2rem">💬 ${g.files.find(f=>f.comentario).comentario}</div>`:''}
       </div>
       <div style="display:flex;align-items:center;gap:.5rem">
         <div class="tarea-nota ${cls}">${notaStr}</div>
-        <button class="btn sm primary" onclick="openCalificarTarea('${t.id}')">✏️</button>
-        <button class="btn sm" onclick="downloadFile('${t.id}','${t.filename}')">⬇</button>
+        <button class="btn sm primary" onclick="openCalificarTarea('${g.files[0].id}')">🔍 Revisar</button>
       </div>
     </div>`;
   }).join('');
 }
 
+// Gather all files for a student+tarea combo
 function openCalificarTarea(id){
   currentTareaId=id;
   const tareas=getTareas();
   const t=tareas.find(t=>t.id===id); if(!t) return;
-  document.getElementById('mct-title').textContent=`Calificar: ${t.tarea} · ${t.name}`;
+  // Gather all files for same student+tarea
+  const related=tareas.filter(x=>x.ci===t.ci&&x.tarea===t.tarea);
+  document.getElementById('mct-title').textContent=`${t.tarea} · ${t.name} (CI: ${t.ci})`;
   document.getElementById('mct-nota').value=t.nota!==undefined?t.nota:'';
   document.getElementById('mct-comentario').value=t.comentario||'';
-  const fEl=document.getElementById('mct-files');
-  fEl.innerHTML=`<div class="file-item">
-    <span class="file-icon">${t.type==='pdf'?'📄':'🐍'}</span>
-    <span class="file-name">${t.filename}</span>
-    <button class="btn sm" onclick="downloadFile('${t.id}','${t.filename}')">⬇ Descargar</button>
-  </div>`;
+
+  // Build tabs
+  const tabsEl=document.getElementById('mct-tabs');
+  const viewerEl=document.getElementById('mct-viewer');
+  tabsEl.innerHTML='';
+  viewerEl.innerHTML='';
+
+  related.forEach((file,i)=>{
+    const btn=document.createElement('button');
+    btn.className='btn sm'+(i===0?' primary':'');
+    btn.textContent=(file.type==='pdf'?'📄 ':'🐍 ')+file.filename;
+    btn.onclick=()=>{
+      tabsEl.querySelectorAll('button').forEach(b=>b.classList.remove('primary'));
+      btn.classList.add('primary');
+      renderFileViewer(file.id,file.type,file.filename);
+      currentTareaId=file.id;
+      document.getElementById('mct-nota').value=file.nota!==undefined?file.nota:'';
+      document.getElementById('mct-comentario').value=file.comentario||'';
+    };
+    tabsEl.appendChild(btn);
+  });
+
+  // Auto-open first file
+  if(related.length>0) renderFileViewer(related[0].id, related[0].type, related[0].filename);
   document.getElementById('modal-calificar-tarea').classList.remove('hidden');
+}
+
+function renderFileViewer(id,type,filename){
+  const viewerEl=document.getElementById('mct-viewer');
+  const f=getFile(id);
+  const ghLink=getTareas().find(t=>t.id===id)?.ghIssue;
+  const ghBtn=ghLink?`<a href="https://github.com/${ghRepo()}/issues/${ghLink}" target="_blank" class="btn sm" style="text-decoration:none">🔗 Issue #${ghLink}</a>`:'';
+
+  if(!f){
+    viewerEl.innerHTML=`<div style="padding:1.2rem;background:var(--bg3);border-radius:8px;text-align:center;color:var(--muted)">
+      <div style="font-size:1.5rem;margin-bottom:.4rem">${type==='pdf'?'📄':'🐍'}</div>
+      <div style="font-size:.78rem">Archivo no en localStorage.<br>
+      ${ghBtn||'Descarga desde GitHub Issues.'}
+      </div>
+    </div>`;
+    return;
+  }
+
+  if(type==='pdf'){
+    viewerEl.innerHTML=`
+      <div class="pdf-toolbar">
+        <span>📄 ${filename}</span>
+        <button class="btn sm" style="background:rgba(255,255,255,.15);color:#fff;border-color:transparent" onclick="downloadFile('${id}','${filename}')">⬇ Descargar</button>
+        ${ghBtn}
+      </div>
+      <div class="pdf-viewer-wrap">
+        <iframe src="${f.data}" title="${filename}"></iframe>
+      </div>`;
+  } else {
+    // Python viewer + runner using Pyodide
+    viewerEl.innerHTML=`
+      <div class="py-toolbar">
+        <span style="font-size:.75rem;color:var(--muted)">🐍 ${filename}</span>
+        <button class="btn sm primary" onclick="runPython()">▶ Ejecutar</button>
+        <button class="btn sm" onclick="clearOutput()">🗑 Limpiar</button>
+        <button class="btn sm" onclick="downloadFile('${id}','${filename}')">⬇ Descargar</button>
+        ${ghBtn}
+      </div>
+      <textarea class="py-editor" id="py-editor" spellcheck="false">${''}</textarea>
+      <div class="py-output" id="py-output">▷ Presiona Ejecutar para correr el código…</div>`;
+    // Load code into editor
+    loadPyCode(id, f);
+  }
+}
+
+function loadPyCode(id, f){
+  // f.data is base64 dataURL
+  try{
+    const b64=f.data.split(',')[1];
+    const txt=atob(b64);
+    document.getElementById('py-editor').value=txt;
+  } catch(e){
+    document.getElementById('py-editor').value='# Error al cargar el código';
+  }
+}
+
+// ── Python runner with Pyodide ────────────────────────────
+let pyodideReady=false, pyodideLoading=false, pyodideInstance=null;
+
+async function ensurePyodide(){
+  if(pyodideReady) return pyodideInstance;
+  if(pyodideLoading) return null;
+  pyodideLoading=true;
+  const out=document.getElementById('py-output');
+  out.className='py-output';
+  out.textContent='⏳ Cargando intérprete Python (Pyodide)… puede tomar 10-20 s la primera vez.';
+  // Dynamically load Pyodide
+  if(!window.loadPyodide){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js';
+      s.onload=res; s.onerror=rej;
+      document.head.appendChild(s);
+    });
+  }
+  pyodideInstance=await window.loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.25.1/full/'});
+  pyodideReady=true;
+  out.textContent='✓ Python listo. Presiona Ejecutar.';
+  return pyodideInstance;
+}
+
+async function runPython(){
+  const code=document.getElementById('py-editor')?.value||'';
+  const out=document.getElementById('py-output');
+  if(!out) return;
+  out.className='py-output';
+  out.textContent='⏳ Ejecutando…';
+  const py=await ensurePyodide();
+  if(!py){ out.textContent='Error: no se pudo cargar Pyodide.'; return; }
+  try{
+    // Capture stdout
+    py.runPython(`
+import sys, io
+_stdout_capture = io.StringIO()
+sys.stdout = _stdout_capture
+`);
+    py.runPython(code);
+    const output=py.runPython(`_stdout_capture.getvalue()`);
+    py.runPython(`sys.stdout = sys.__stdout__`);
+    out.textContent=output||'(sin salida)';
+  } catch(err){
+    out.className='py-output error';
+    out.textContent='❌ Error:\n'+err.message;
+    try{ py.runPython(`sys.stdout = sys.__stdout__`); }catch(e){}
+  }
+}
+
+function clearOutput(){
+  const out=document.getElementById('py-output');
+  if(out) out.textContent='▷ Presiona Ejecutar para correr el código…';
 }
 
 function saveTareaNota(){
@@ -1286,8 +1587,18 @@ function saveTareaNota(){
   const com=document.getElementById('mct-comentario').value.trim();
   if(isNaN(nota)||nota<0||nota>100){ alert('Ingresa una nota entre 0 y 100.'); return; }
   const tareas=getTareas();
-  const idx=tareas.findIndex(t=>t.id===currentTareaId);
-  if(idx>-1){ tareas[idx].nota=nota; tareas[idx].comentario=com; saveTareas(tareas); }
+  // Find current file to get ci+tarea group
+  const current=tareas.find(t=>t.id===currentTareaId);
+  if(current){
+    // Apply nota and comentario to ALL files of same student+tarea
+    tareas.forEach((t,i)=>{
+      if(t.ci===current.ci&&t.tarea===current.tarea){
+        tareas[i].nota=nota;
+        tareas[i].comentario=com;
+      }
+    });
+    saveTareas(tareas);
+  }
   closeModal('modal-calificar-tarea');
   renderTareas(); renderDocenteStats();
 }
