@@ -1,13 +1,1241 @@
-<!-- This is a placeholder for the content from portal_notas-1.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Notas</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal de Notas · Análisis Numérico 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN: Refined academic — navy + gold
+═══════════════════════════════════════════ */
+:root{
+  --navy:   #1D3557;
+  --navy2:  #162840;
+  --gold:   #E9C46A;
+  --gold2:  #F4A261;
+  --green:  #2A9D8F;
+  --red:    #E63946;
+  --bg:     #F8F9FB;
+  --bg2:    #FFFFFF;
+  --bg3:    #EEF3FA;
+  --border: #DDE3EF;
+  --text:   #1D2433;
+  --muted:  #6B7A99;
+  --shadow: 0 2px 16px rgba(29,53,87,.08);
+  --shadow2:0 8px 32px rgba(29,53,87,.14);
+  --r:      10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── HEADER ── */
+.site-header{
+  background:var(--navy);
+  padding:0 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+  height:58px;position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.25);
+}
+.logo{display:flex;align-items:center;gap:.7rem;}
+.logo-icon{font-size:1.4rem;}
+.logo-text{color:#fff;font-weight:700;font-size:.95rem;line-height:1.2;}
+.logo-text span{color:var(--gold);display:block;font-size:.68rem;font-weight:400;letter-spacing:.06em;text-transform:uppercase;}
+.hdr-right{display:flex;align-items:center;gap:.6rem;}
+.mode-badge{
+  font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600;
+  padding:.25rem .7rem;border-radius:20px;background:var(--gold);color:var(--navy2);
+}
+
+/* ── TABS ── */
+.tabs-bar{
+  background:#fff;border-bottom:1px solid var(--border);
+  display:flex;padding:0 1.5rem;gap:0;overflow-x:auto;
+}
+.tab-btn{
+  padding:.75rem 1.1rem;font-size:.8rem;font-weight:600;color:var(--muted);
+  border:none;background:none;cursor:pointer;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:all .2s;
+}
+.tab-btn.on{color:var(--navy);border-bottom-color:var(--navy);}
+.tab-btn:hover:not(.on){color:var(--navy);background:var(--bg3);}
+
+/* ── WRAP ── */
+.wrap{max-width:960px;margin:0 auto;padding:1.5rem 1rem 4rem;}
+.screen{display:none;}
+.screen.on{display:block;animation:fadeup .3s ease;}
+@keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ── CARDS ── */
+.card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:1.4rem;box-shadow:var(--shadow);
+  margin-bottom:1.1rem;
+}
+.card-title{
+  font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;
+}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── FORM FIELDS ── */
+.fld{margin-bottom:.9rem;}
+.fld label{display:block;font-size:.68rem;font-weight:600;color:var(--muted);
+  letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem;}
+.fld input,.fld select,.fld textarea{
+  width:100%;background:var(--bg3);border:1.5px solid var(--border);
+  border-radius:7px;padding:.6rem .9rem;font-family:'DM Sans',sans-serif;
+  font-size:.88rem;color:var(--text);outline:none;transition:all .2s;
+}
+.fld input:focus,.fld select:focus,.fld textarea:focus{
+  border-color:var(--navy);box-shadow:0 0 0 3px rgba(29,53,87,.1);}
+.fld-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+
+/* ── BUTTONS ── */
+.btn{
+  padding:.62rem 1.2rem;border:1.5px solid var(--border);border-radius:7px;
+  background:var(--bg2);color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;
+}
+.btn:hover{border-color:var(--navy);color:var(--navy);}
+.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy);}
+.btn.primary:hover{background:var(--navy2);}
+.btn.gold{background:var(--gold);color:var(--navy2);border-color:var(--gold);}
+.btn.gold:hover{background:var(--gold2);}
+.btn.danger{border-color:var(--red);color:var(--red);}
+.btn.danger:hover{background:#fff0f0;}
+.btn.sm{padding:.4rem .8rem;font-size:.72rem;}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;}
+
+/* ── QUIZ SELECTOR GRID ── */
+.qz-sel-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;margin-bottom:1rem;}
+.qz-sel-btn{
+  padding:.55rem .2rem;border-radius:6px;border:1.5px solid var(--border);
+  background:transparent;font-family:'DM Mono',monospace;font-size:.72rem;
+  color:var(--muted);cursor:pointer;text-align:center;transition:all .18s;
+}
+.qz-sel-btn.on{border-color:var(--navy);color:var(--navy);background:var(--bg3);}
+
+/* ── NOTA INPUT ROW ── */
+.nota-row{
+  display:grid;grid-template-columns:auto 1fr 90px 90px 36px;
+  align-items:center;gap:.6rem;padding:.5rem .7rem;
+  background:var(--bg3);border-radius:6px;margin-bottom:.35rem;
+}
+.nota-row .qz-tag{
+  font-family:'DM Mono',monospace;font-size:.7rem;font-weight:600;
+  padding:.2rem .5rem;border-radius:4px;background:var(--navy);color:#fff;
+  white-space:nowrap;
+}
+.nota-row .qz-name{font-size:.78rem;color:var(--muted);}
+.nota-inp{
+  width:100%;background:#fff;border:1.5px solid var(--border);
+  border-radius:5px;padding:.35rem .6rem;font-family:'DM Mono',monospace;
+  font-size:.85rem;color:var(--text);text-align:center;outline:none;
+}
+.nota-inp:focus{border-color:var(--navy);}
+.nota-state{
+  font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:.2rem .5rem;border-radius:4px;text-align:center;
+}
+.nota-state.aprobado{background:#eef8f3;color:var(--green);}
+.nota-state.reprobado{background:#fff0f0;color:var(--red);}
+.nota-state.vacio{background:var(--bg3);color:var(--muted);}
+.nota-del{
+  width:28px;height:28px;border-radius:5px;border:1px solid var(--border);
+  background:none;cursor:pointer;color:var(--muted);font-size:.85rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.nota-del:hover{background:#fff0f0;color:var(--red);border-color:var(--red);}
+
+/* ── PROMEDIO CARD ── */
+.prom-ring{
+  width:90px;height:90px;border-radius:50%;border:3px solid var(--border);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  flex-shrink:0;transition:all .4s;
+}
+.prom-ring.pass{border-color:var(--green);box-shadow:0 0 20px rgba(42,157,143,.2);}
+.prom-ring.fail{border-color:var(--red);box-shadow:0 0 16px rgba(230,57,70,.15);}
+.prom-val{font-family:'DM Mono',monospace;font-size:1.5rem;font-weight:700;line-height:1;}
+.prom-val.pass{color:var(--green);}
+.prom-val.fail{color:var(--red);}
+.prom-lbl{font-size:.55rem;color:var(--muted);letter-spacing:.08em;margin-top:.2rem;}
+
+/* ── TABLA NOTAS ── */
+.tabla-notas{width:100%;border-collapse:collapse;font-size:.78rem;}
+.tabla-notas th{
+  background:var(--navy);color:#fff;padding:.55rem .7rem;
+  text-align:center;font-weight:600;font-size:.68rem;letter-spacing:.06em;
+}
+.tabla-notas th:first-child{text-align:left;}
+.tabla-notas td{
+  padding:.5rem .7rem;border-bottom:1px solid var(--border);
+  text-align:center;font-family:'DM Mono',monospace;font-size:.78rem;
+}
+.tabla-notas td:first-child{text-align:left;font-family:'DM Sans',sans-serif;font-weight:600;}
+.tabla-notas tr:hover{background:var(--bg3);}
+.nota-pill{
+  display:inline-block;padding:.15rem .45rem;border-radius:4px;
+  font-size:.72rem;font-weight:600;
+}
+.nota-pill.pass{background:#eef8f3;color:var(--green);}
+.nota-pill.fail{background:#fff0f0;color:var(--red);}
+.nota-pill.empty{background:var(--bg3);color:var(--muted);}
+
+/* ── TAREAS ── */
+.tarea-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+  padding:1rem;margin-bottom:.6rem;display:flex;align-items:center;gap:.9rem;
+}
+.tarea-icon{font-size:1.6rem;flex-shrink:0;}
+.tarea-info{flex:1;}
+.tarea-name{font-weight:600;font-size:.88rem;margin-bottom:.15rem;}
+.tarea-meta{font-size:.68rem;color:var(--muted);}
+.tarea-nota{
+  font-family:'DM Mono',monospace;font-size:1rem;font-weight:700;
+  min-width:52px;text-align:center;
+}
+.tarea-nota.pass{color:var(--green);}
+.tarea-nota.fail{color:var(--red);}
+.tarea-nota.pending{color:var(--muted);}
+.nota-inp-tarea{
+  width:68px;background:#fff;border:1.5px solid var(--border);
+  border-radius:5px;padding:.3rem .5rem;font-family:'DM Mono',monospace;
+  font-size:.85rem;text-align:center;outline:none;
+}
+.nota-inp-tarea:focus{border-color:var(--navy);}
+
+/* ── STATS BAR ── */
+.stats-bar{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1.2rem;
+}
+.stat-tile{
+  background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+  padding:.9rem;text-align:center;
+}
+.stat-v{
+  font-family:'DM Mono',monospace;font-size:1.35rem;font-weight:700;
+  color:var(--navy);display:block;margin-bottom:.2rem;
+}
+.stat-l{font-size:.6rem;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;}
+
+/* ── PROGRESS BAR ── */
+.prog-wrap{background:var(--border);border-radius:4px;height:6px;overflow:hidden;margin-top:.3rem;}
+.prog-fill{height:100%;border-radius:4px;transition:width .5s ease;}
+
+/* ── TEACHER PANEL ── */
+.student-row-teacher{
+  background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+  padding:.9rem 1rem;margin-bottom:.5rem;cursor:pointer;transition:all .2s;
+}
+.student-row-teacher:hover{border-color:var(--navy);background:var(--bg3);}
+.str-top{display:flex;align-items:center;gap:.8rem;}
+.str-avatar{
+  width:38px;height:38px;border-radius:50%;background:var(--navy);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.85rem;flex-shrink:0;
+}
+.str-name{font-weight:700;font-size:.9rem;}
+.str-meta{font-size:.68rem;color:var(--muted);margin-top:.1rem;}
+.str-nota{
+  margin-left:auto;font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;
+}
+.str-nota.pass{color:var(--green);}
+.str-nota.fail{color:var(--red);}
+.str-nota.empty{color:var(--muted);}
+.str-detail{display:none;margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--border);}
+.str-detail.open{display:block;}
+
+/* ── FILE UPLOAD ZONE ── */
+.upload-zone{
+  border:2px dashed var(--border);border-radius:8px;padding:2rem;
+  text-align:center;cursor:pointer;transition:all .2s;
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--navy);background:var(--bg3);}
+.upload-zone input{display:none;}
+.upload-icon{font-size:2rem;margin-bottom:.5rem;}
+.upload-txt{font-size:.8rem;color:var(--muted);}
+.upload-txt strong{color:var(--navy);}
+
+/* ── FILE LIST ── */
+.file-item{
+  display:flex;align-items:center;gap:.7rem;padding:.6rem .8rem;
+  background:var(--bg3);border-radius:6px;margin-bottom:.4rem;
+}
+.file-icon{font-size:1.2rem;flex-shrink:0;}
+.file-name{font-size:.8rem;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.file-size{font-size:.65rem;color:var(--muted);white-space:nowrap;}
+.file-del{
+  background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem;
+}
+.file-del:hover{color:var(--red);}
+
+/* ── MESSAGES ── */
+.msg{
+  padding:.65rem .9rem;border-radius:7px;font-size:.78rem;margin-bottom:.8rem;
+  display:none;
+}
+.msg.ok{background:#eef8f3;border:1px solid var(--green);color:var(--green);display:block;}
+.msg.err{background:#fff0f0;border:1px solid var(--red);color:var(--red);display:block;}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);
+  z-index:200;display:flex;align-items:center;justify-content:center;
+  animation:fadeup .2s ease;
+}
+.modal-overlay.hidden{display:none;}
+.modal{
+  background:#fff;border-radius:12px;padding:1.8rem;
+  width:min(92vw,540px);box-shadow:var(--shadow2);
+  max-height:90vh;overflow-y:auto;
+}
+.modal-title{font-size:1rem;font-weight:700;margin-bottom:1.2rem;color:var(--navy);}
+.modal-close{
+  float:right;background:none;border:none;font-size:1.2rem;cursor:pointer;
+  color:var(--muted);margin-top:-.2rem;
+}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--muted);}
+.empty-icon{font-size:2.5rem;margin-bottom:.6rem;display:block;}
+.empty-txt{font-size:.82rem;line-height:1.8;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:580px){
+  .stats-bar{grid-template-columns:repeat(2,1fr);}
+  .fld-row{grid-template-columns:1fr;}
+  .qz-sel-grid{grid-template-columns:repeat(5,1fr);}
+  .nota-row{grid-template-columns:auto 1fr 70px 70px 28px;}
+}
+</style>
 </head>
 <body>
-    <h1>Welcome to the Portal Notas</h1>
-    <p>This is where you will find key information.</p>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="logo">
+    <span class="logo-icon">📊</span>
+    <div class="logo-text">
+      Portal de Notas
+      <span>Análisis Numérico · Gestión 2026</span>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <span class="mode-badge" id="mode-badge">Estudiante</span>
+  </div>
+</header>
+
+<!-- ── TABS ── -->
+<nav class="tabs-bar" id="tabs-bar">
+  <button class="tab-btn on" onclick="switchTab('mis-notas')">📈 Mis Notas</button>
+  <button class="tab-btn" onclick="switchTab('mis-tareas')">📁 Mis Tareas</button>
+  <button class="tab-btn" onclick="switchTab('panel-docente')" id="tab-docente" style="display:none">🎓 Panel Docente</button>
+</nav>
+
+<div class="wrap">
+
+<!-- ════════════════════════════════════════
+     SCREEN: MIS NOTAS (Estudiante)
+════════════════════════════════════════ -->
+<div class="screen on" id="s-mis-notas">
+
+  <!-- Identificación -->
+  <div class="card" id="id-card">
+    <div class="card-title">👤 Identificación</div>
+    <div class="fld-row">
+      <div class="fld">
+        <label>Nombre y Apellido</label>
+        <input id="st-name" type="text" placeholder="Juan Carlos Mamani Flores"
+          oninput="onIdChange()">
+      </div>
+      <div class="fld">
+        <label>Carnet de Identidad (CI)</label>
+        <input id="st-ci" type="text" placeholder="12345678"
+          oninput="onIdChange()">
+      </div>
+    </div>
+    <div id="id-msg" class="msg"></div>
+  </div>
+
+  <!-- Resumen -->
+  <div id="resumen-wrap" style="display:none">
+
+    <div class="stats-bar" id="stats-bar"></div>
+
+    <!-- Notas por quiz -->
+    <div class="card">
+      <div class="card-title">🎯 Notas por Quiz</div>
+      <div id="qz-notas-wrap"></div>
+    </div>
+
+    <!-- Tareas -->
+    <div class="card">
+      <div class="card-title">📁 Mis Tareas Entregadas</div>
+      <div id="st-tareas-wrap"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn primary" onclick="exportMisPDF()">⬇ Exportar mi reporte</button>
+      <button class="btn" onclick="clearId()">↩ Cambiar estudiante</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: MIS TAREAS (subir archivos)
+════════════════════════════════════════ -->
+<div class="screen" id="s-mis-tareas">
+
+  <div class="card" id="tarea-id-card">
+    <div class="card-title">👤 Identificación para entregar tarea</div>
+    <div class="fld-row">
+      <div class="fld">
+        <label>Nombre y Apellido</label>
+        <input id="t-name" type="text" placeholder="Juan Carlos Mamani Flores">
+      </div>
+      <div class="fld">
+        <label>CI</label>
+        <input id="t-ci" type="text" placeholder="12345678">
+      </div>
+    </div>
+    <div class="fld">
+      <label>Número de Tarea</label>
+      <select id="t-num">
+        <option value="">— Seleccionar tarea —</option>
+        <option>Tarea 1</option><option>Tarea 2</option><option>Tarea 3</option>
+        <option>Tarea 4</option><option>Tarea 5</option><option>Tarea 6</option>
+        <option>Tarea 7</option><option>Tarea 8</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📎 Adjuntar Archivos</div>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:.9rem;">
+      Sube tu archivo PDF (informe) y/o archivo Python (.py). Máximo 10 MB por archivo.
+    </p>
+
+    <div class="upload-zone" id="upload-zone-pdf"
+      onclick="document.getElementById('file-pdf').click()"
+      ondragover="dragOver(event,'upload-zone-pdf')"
+      ondragleave="dragLeave(event,'upload-zone-pdf')"
+      ondrop="dropFile(event,'pdf')">
+      <input type="file" id="file-pdf" accept=".pdf" onchange="addFile(this,'pdf')">
+      <div class="upload-icon">📄</div>
+      <div class="upload-txt"><strong>Clic o arrastra</strong> para subir el PDF</div>
+    </div>
+
+    <div id="pdf-list" style="margin-top:.6rem;"></div>
+
+    <div class="upload-zone" id="upload-zone-py" style="margin-top:.7rem;"
+      onclick="document.getElementById('file-py').click()"
+      ondragover="dragOver(event,'upload-zone-py')"
+      ondragleave="dragLeave(event,'upload-zone-py')"
+      ondrop="dropFile(event,'py')">
+      <input type="file" id="file-py" accept=".py,.ipynb" onchange="addFile(this,'py')">
+      <div class="upload-icon">🐍</div>
+      <div class="upload-txt"><strong>Clic o arrastra</strong> para subir el archivo Python (.py / .ipynb)</div>
+    </div>
+
+    <div id="py-list" style="margin-top:.6rem;"></div>
+  </div>
+
+  <div id="tarea-msg" class="msg"></div>
+  <div class="btn-row">
+    <button class="btn primary" onclick="submitTarea()">📤 Entregar Tarea</button>
+  </div>
+
+  <div class="card" style="margin-top:1.2rem;">
+    <div class="card-title">📋 Mis Entregas Anteriores</div>
+    <div id="mis-entregas-list"></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: PANEL DOCENTE
+════════════════════════════════════════ -->
+<div class="screen" id="s-panel-docente">
+
+  <!-- Acceso docente -->
+  <div class="card" id="docente-login-card">
+    <div class="card-title">🔐 Acceso Docente</div>
+    <div class="fld">
+      <label>Contraseña del docente</label>
+      <input id="docente-pass" type="password" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter')checkDocentePass()">
+    </div>
+    <div id="docente-login-msg" class="msg"></div>
+    <button class="btn primary" onclick="checkDocentePass()">Ingresar →</button>
+  </div>
+
+  <!-- Panel principal docente (oculto hasta login) -->
+  <div id="docente-panel" style="display:none">
+
+    <div class="stats-bar" id="docente-stats"></div>
+
+    <!-- TABS del docente -->
+    <div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+      <button class="btn on" id="dtab-est" onclick="switchDocenteTab('estudiantes')">👥 Estudiantes</button>
+      <button class="btn" id="dtab-tar" onclick="switchDocenteTab('tareas')">📁 Tareas</button>
+      <button class="btn" id="dtab-notas" onclick="switchDocenteTab('notas-masivo')">✏️ Calificar Quizzes</button>
+      <button class="btn gold" onclick="exportAll()">⬇ Exportar CSV</button>
+    </div>
+
+    <!-- Sub-panel: Estudiantes -->
+    <div id="dp-estudiantes">
+      <div class="card">
+        <div class="card-title">👥 Todos los Estudiantes</div>
+        <div style="margin-bottom:.7rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+          <input id="search-est" type="text" placeholder="Buscar por nombre o CI…"
+            style="flex:1;min-width:160px;padding:.5rem .8rem;border:1.5px solid var(--border);border-radius:6px;font-size:.82rem;outline:none;"
+            oninput="renderEstudiantes()">
+          <button class="btn sm primary" onclick="openAddStudent()">+ Agregar</button>
+        </div>
+        <div id="lista-estudiantes"></div>
+      </div>
+    </div>
+
+    <!-- Sub-panel: Tareas entregadas -->
+    <div id="dp-tareas" style="display:none">
+      <div class="card">
+        <div class="card-title">📁 Tareas Entregadas</div>
+        <div style="margin-bottom:.7rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+          <input id="search-tar" type="text" placeholder="Buscar por nombre, CI o tarea…"
+            style="flex:1;min-width:160px;padding:.5rem .8rem;border:1.5px solid var(--border);border-radius:6px;font-size:.82rem;outline:none;"
+            oninput="renderTareas()">
+          <select id="filter-tar" onchange="renderTareas()"
+            style="padding:.5rem .7rem;border:1.5px solid var(--border);border-radius:6px;font-size:.78rem;outline:none;">
+            <option value="">Todas</option>
+            <option>Tarea 1</option><option>Tarea 2</option><option>Tarea 3</option>
+            <option>Tarea 4</option><option>Tarea 5</option><option>Tarea 6</option>
+            <option>Tarea 7</option><option>Tarea 8</option>
+          </select>
+        </div>
+        <div id="lista-tareas"></div>
+      </div>
+    </div>
+
+    <!-- Sub-panel: Calificar quizzes masivo -->
+    <div id="dp-notas-masivo" style="display:none">
+      <div class="card">
+        <div class="card-title">✏️ Calificar Quizzes</div>
+        <div style="margin-bottom:.7rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+          <input id="search-notas" type="text" placeholder="Buscar estudiante…"
+            style="flex:1;min-width:160px;padding:.5rem .8rem;border:1.5px solid var(--border);border-radius:6px;font-size:.82rem;outline:none;"
+            oninput="renderNotasMasivo()">
+          <span style="font-size:.72rem;color:var(--muted);">Escribe nota (0-100) y presiona Enter</span>
+        </div>
+        <div id="lista-notas-masivo"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- ── MODAL AGREGAR ESTUDIANTE ── -->
+<div class="modal-overlay hidden" id="modal-add-student">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-add-student')">✕</button>
+    <div class="modal-title">➕ Agregar Estudiante</div>
+    <div class="fld">
+      <label>Nombre y Apellido</label>
+      <input id="new-st-name" type="text" placeholder="Juan Carlos Mamani Flores">
+    </div>
+    <div class="fld">
+      <label>Carnet de Identidad (CI)</label>
+      <input id="new-st-ci" type="text" placeholder="12345678">
+    </div>
+    <div id="add-st-msg" class="msg"></div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="addStudent()">Agregar →</button>
+      <button class="btn" onclick="closeModal('modal-add-student')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL VER NOTA TAREA ── -->
+<div class="modal-overlay hidden" id="modal-calificar-tarea">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-calificar-tarea')">✕</button>
+    <div class="modal-title" id="mct-title">Calificar Tarea</div>
+    <div id="mct-files"></div>
+    <div class="fld" style="margin-top:1rem;">
+      <label>Nota (0 – 100)</label>
+      <input id="mct-nota" type="number" min="0" max="100" placeholder="Ej: 85">
+    </div>
+    <div class="fld">
+      <label>Comentario (opcional)</label>
+      <textarea id="mct-comentario" rows="3" placeholder="Observaciones…"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="saveTareaNota()">💾 Guardar nota</button>
+      <button class="btn" onclick="closeModal('modal-calificar-tarea')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  CONSTANTES Y CONFIGURACIÓN
+// ════════════════════════════════════════════════════════
+const DOCENTE_PASS = 'analisis2026'; // contraseña del docente
+const PASS_MIN     = 51;             // nota mínima para aprobar
+
+const QUIZ_NAMES = {
+  1:'Ec. Movimiento',2:'Masa Variable',3:'Masa Constante',4:'Tsiolkovsky',
+  5:'Análisis β',6:'Marte',7:'Euler',8:'Verlet',9:'euler_1',10:'verlet_2'
+};
+
+// Storage keys
+const K_STUDENTS = 'an2026_students';   // lista de estudiantes
+const K_NOTAS    = 'an2026_notas';      // notas de quizzes
+const K_TAREAS   = 'an2026_tareas';     // tareas entregadas
+const K_FILES    = 'an2026_files';      // archivos (base64)
+
+// ── Helpers storage ──────────────────────────────────────
+const load = k => { try{ return JSON.parse(localStorage.getItem(k)||'{}'); }catch{ return {}; } };
+const loadArr = k => { try{ return JSON.parse(localStorage.getItem(k)||'[]'); }catch{ return []; } };
+const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+
+// ── Get/set notas: {ci: {q1:nota, q2:nota, ...}} ─────────
+function getNotas(){ return load(K_NOTAS); }
+function getNota(ci, q){ const n=getNotas(); return n[ci]?.[q]; }
+function setNota(ci, q, val){
+  const n=getNotas(); if(!n[ci]) n[ci]={};
+  if(val===null||val===''){ delete n[ci][q]; } else { n[ci][q]=parseFloat(val); }
+  save(K_NOTAS, n);
+}
+function promedioNotas(ci){
+  const n=getNotas()[ci]||{}; const vals=Object.values(n).filter(v=>v!==null);
+  return vals.length? (vals.reduce((a,b)=>a+b,0)/vals.length) : null;
+}
+
+// ── Students ─────────────────────────────────────────────
+function getStudents(){ return loadArr(K_STUDENTS); }
+function saveStudents(arr){ save(K_STUDENTS, arr); }
+function findStudent(ci){ return getStudents().find(s=>s.ci===ci); }
+function addStudentDB(name,ci){
+  const arr=getStudents();
+  if(arr.find(s=>s.ci===ci)) return false;
+  arr.push({name,ci,added:new Date().toLocaleDateString('es-BO')});
+  saveStudents(arr); return true;
+}
+
+// ── Tareas ───────────────────────────────────────────────
+function getTareas(){ return loadArr(K_TAREAS); }
+function saveTareas(arr){ save(K_TAREAS, arr); }
+function getTareasStudent(ci){ return getTareas().filter(t=>t.ci===ci); }
+
+// ── Files (base64) ────────────────────────────────────────
+function getFiles(){ return load(K_FILES); }
+function saveFile(id, data){ const f=getFiles(); f[id]=data; save(K_FILES,f); }
+function getFile(id){ return getFiles()[id]; }
+
+// ════════════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════════════
+let currentTab='mis-notas';
+
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('s-'+tab).classList.add('on');
+  event.target.classList.add('on');
+  if(tab==='mis-tareas') renderMisEntregas();
+  if(tab==='panel-docente') checkDocenteLoginState();
+}
+
+function switchDocenteTab(tab){
+  ['estudiantes','tareas','notas-masivo'].forEach(t=>{
+    const el=document.getElementById('dp-'+t);
+    if(el) el.style.display=t===tab?'block':'none';
+  });
+  ['dtab-est','dtab-tar','dtab-notas'].forEach(id=>{
+    document.getElementById(id)?.classList.remove('on');
+  });
+  const map={estudiantes:'dtab-est',tareas:'dtab-tar','notas-masivo':'dtab-notas'};
+  document.getElementById(map[tab])?.classList.add('on');
+  if(tab==='estudiantes') renderEstudiantes();
+  if(tab==='tareas') renderTareas();
+  if(tab==='notas-masivo') renderNotasMasivo();
+}
+
+// ════════════════════════════════════════════════════════
+//  SCREEN: MIS NOTAS
+// ════════════════════════════════════════════════════════
+let currentCI = null;
+
+function onIdChange(){
+  const name=document.getElementById('st-name').value.trim();
+  const ci=document.getElementById('st-ci').value.trim();
+  if(name.length>=3 && ci.length>=5){
+    currentCI=ci;
+    // auto-register student if not exists
+    addStudentDB(name,ci);
+    renderMisNotas(name,ci);
+  } else {
+    document.getElementById('resumen-wrap').style.display='none';
+  }
+}
+
+function clearId(){
+  document.getElementById('st-name').value='';
+  document.getElementById('st-ci').value='';
+  document.getElementById('resumen-wrap').style.display='none';
+  currentCI=null;
+}
+
+function renderMisNotas(name,ci){
+  const wrap=document.getElementById('resumen-wrap');
+  wrap.style.display='block';
+
+  // Stats
+  const prom=promedioNotas(ci);
+  const notasObj=getNotas()[ci]||{};
+  const rendidos=Object.keys(notasObj).length;
+  const aprobados=Object.values(notasObj).filter(v=>v>=PASS_MIN).length;
+  const tareasEnt=getTareasStudent(ci).length;
+
+  const promDisplay=prom!==null?prom.toFixed(1)+'%':'—';
+  const promClass=prom===null?'':prom>=PASS_MIN?'pass':'fail';
+
+  document.getElementById('stats-bar').innerHTML=`
+    <div class="stat-tile">
+      <span class="stat-v">${rendidos}/10</span>
+      <div class="stat-l">Quizzes rendidos</div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:${rendidos*10}%;background:var(--navy)"></div></div>
+    </div>
+    <div class="stat-tile">
+      <span class="stat-v" style="color:var(--${promClass==='pass'?'green':promClass==='fail'?'red':'muted'})">${promDisplay}</span>
+      <div class="stat-l">Promedio quizzes</div>
+    </div>
+    <div class="stat-tile">
+      <span class="stat-v" style="color:var(--green)">${aprobados}</span>
+      <div class="stat-l">Quizzes aprobados</div>
+    </div>
+    <div class="stat-tile">
+      <span class="stat-v">${tareasEnt}</span>
+      <div class="stat-l">Tareas entregadas</div>
+    </div>
+  `;
+
+  // Notas por quiz
+  const qzWrap=document.getElementById('qz-notas-wrap');
+  let rows='';
+  for(let q=1;q<=10;q++){
+    const nota=getNota(ci,q);
+    const state=nota===undefined?'vacio':nota>=PASS_MIN?'aprobado':'reprobado';
+    const stateLabel=nota===undefined?'Pendiente':nota>=PASS_MIN?'Aprobado':'Reprobado';
+    const notaDisplay=nota===undefined?'—':nota.toFixed(1)+'%';
+    rows+=`<div class="nota-row">
+      <span class="qz-tag">Q${q}</span>
+      <span class="qz-name">${QUIZ_NAMES[q]}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:.85rem;text-align:center">${notaDisplay}</span>
+      <span class="nota-state ${state}">${stateLabel}</span>
+      <span></span>
+    </div>`;
+  }
+  qzWrap.innerHTML=rows||'<div class="empty"><span class="empty-icon">🎯</span><div class="empty-txt">Aún no tienes notas registradas.</div></div>';
+
+  // Tareas del estudiante
+  const tareas=getTareasStudent(ci);
+  const tarWrap=document.getElementById('st-tareas-wrap');
+  if(!tareas.length){
+    tarWrap.innerHTML='<div class="empty"><span class="empty-icon">📁</span><div class="empty-txt">No has entregado tareas aún.</div></div>';
+  } else {
+    tarWrap.innerHTML=tareas.map(t=>{
+      const notaT=t.nota!==undefined?t.nota.toFixed(1)+'%':'Pendiente';
+      const cls=t.nota===undefined?'pending':t.nota>=PASS_MIN?'pass':'fail';
+      return `<div class="tarea-card">
+        <span class="tarea-icon">${t.type==='pdf'?'📄':'🐍'}</span>
+        <div class="tarea-info">
+          <div class="tarea-name">${t.tarea} — ${t.filename}</div>
+          <div class="tarea-meta">Entregado: ${t.date}</div>
+          ${t.comentario?`<div class="tarea-meta" style="color:var(--navy)">💬 ${t.comentario}</div>`:''}
+        </div>
+        <div class="tarea-nota ${cls}">${notaT}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  SCREEN: MIS TAREAS (subir)
+// ════════════════════════════════════════════════════════
+let pendingFiles={pdf:null,py:null};
+
+function addFile(inp,type){
+  const file=inp.files[0]; if(!file) return;
+  if(file.size>10*1024*1024){ alert('El archivo supera 10 MB.'); return; }
+  pendingFiles[type]={name:file.name,size:file.size,file};
+  renderFilePreview(type);
+}
+
+function renderFilePreview(type){
+  const list=document.getElementById(type+'-list');
+  const f=pendingFiles[type];
+  if(!f){ list.innerHTML=''; return; }
+  const sz=(f.size/1024).toFixed(1);
+  list.innerHTML=`<div class="file-item">
+    <span class="file-icon">${type==='pdf'?'📄':'🐍'}</span>
+    <span class="file-name">${f.name}</span>
+    <span class="file-size">${sz} KB</span>
+    <button class="file-del" onclick="removeFile('${type}')">✕</button>
+  </div>`;
+}
+
+function removeFile(type){
+  pendingFiles[type]=null;
+  document.getElementById(type+'-list').innerHTML='';
+  document.getElementById('file-'+type).value='';
+}
+
+function dragOver(e,id){ e.preventDefault(); document.getElementById(id).classList.add('drag'); }
+function dragLeave(e,id){ document.getElementById(id).classList.remove('drag'); }
+function dropFile(e,type){
+  e.preventDefault();
+  const id='upload-zone-'+type;
+  document.getElementById(id).classList.remove('drag');
+  const file=e.dataTransfer.files[0]; if(!file) return;
+  pendingFiles[type]={name:file.name,size:file.size,file};
+  renderFilePreview(type);
+}
+
+function submitTarea(){
+  const name=document.getElementById('t-name').value.trim();
+  const ci=document.getElementById('t-ci').value.trim();
+  const tarea=document.getElementById('t-num').value;
+  const msgEl=document.getElementById('tarea-msg');
+  msgEl.className='msg';
+
+  if(!name||!ci||!tarea){ msgEl.className='msg err'; msgEl.textContent='⚠ Completa todos los campos.'; return; }
+  if(!pendingFiles.pdf && !pendingFiles.py){ msgEl.className='msg err'; msgEl.textContent='⚠ Adjunta al menos un archivo.'; return; }
+
+  // auto-register student
+  addStudentDB(name,ci);
+
+  const arr=getTareas();
+  const date=new Date().toLocaleString('es-BO');
+
+  const saveOne=(type,f)=>{
+    if(!f) return;
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const id=`${ci}_${tarea}_${type}_${Date.now()}`;
+      try{ saveFile(id,{name:f.name,data:e.target.result,type}); } catch(err){ console.warn('Storage full',err); }
+      arr.push({id,ci,name,tarea,filename:f.name,type,date,nota:undefined,comentario:''});
+      saveTareas(arr);
+    };
+    reader.readAsDataURL(f.file);
+  };
+
+  saveOne('pdf',pendingFiles.pdf);
+  saveOne('py',pendingFiles.py);
+
+  setTimeout(()=>{
+    msgEl.className='msg ok';
+    msgEl.textContent='✓ Tarea entregada correctamente.';
+    pendingFiles={pdf:null,py:null};
+    ['pdf','py'].forEach(t=>{ document.getElementById(t+'-list').innerHTML=''; document.getElementById('file-'+t).value=''; });
+    renderMisEntregas();
+  },400);
+}
+
+function renderMisEntregas(){
+  const ci=document.getElementById('t-ci').value.trim();
+  const wrap=document.getElementById('mis-entregas-list');
+  const all=ci? getTareasStudent(ci) : getTareas();
+  if(!all.length){ wrap.innerHTML='<div class="empty"><span class="empty-icon">📭</span><div class="empty-txt">Sin entregas aún.</div></div>'; return; }
+  wrap.innerHTML=all.slice().reverse().map(t=>{
+    const notaT=t.nota!==undefined?t.nota.toFixed(1)+'%':'⏳ Pendiente';
+    const cls=t.nota===undefined?'pending':t.nota>=PASS_MIN?'pass':'fail';
+    return `<div class="tarea-card">
+      <span class="tarea-icon">${t.type==='pdf'?'📄':'🐍'}</span>
+      <div class="tarea-info">
+        <div class="tarea-name">${t.tarea} — ${t.filename}</div>
+        <div class="tarea-meta">CI: ${t.ci} · ${t.date}</div>
+        ${t.comentario?`<div class="tarea-meta" style="color:var(--navy)">💬 ${t.comentario}</div>`:''}
+      </div>
+      <div class="tarea-nota ${cls}">${notaT}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════
+//  DOCENTE: LOGIN
+// ════════════════════════════════════════════════════════
+let docenteLoggedIn=false;
+
+function checkDocentePass(){
+  const pass=document.getElementById('docente-pass').value;
+  const msg=document.getElementById('docente-login-msg');
+  if(pass===DOCENTE_PASS){
+    docenteLoggedIn=true;
+    document.getElementById('docente-login-card').style.display='none';
+    document.getElementById('docente-panel').style.display='block';
+    document.getElementById('mode-badge').textContent='Docente';
+    document.getElementById('mode-badge').style.background='var(--gold2)';
+    renderDocenteStats();
+    switchDocenteTab('estudiantes');
+  } else {
+    msg.className='msg err'; msg.textContent='⚠ Contraseña incorrecta.';
+  }
+}
+
+function checkDocenteLoginState(){
+  if(docenteLoggedIn){
+    document.getElementById('docente-login-card').style.display='none';
+    document.getElementById('docente-panel').style.display='block';
+    renderDocenteStats();
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  DOCENTE: STATS
+// ════════════════════════════════════════════════════════
+function renderDocenteStats(){
+  const students=getStudents();
+  const notas=getNotas();
+  const tareas=getTareas();
+  const promedios=students.map(s=>promedioNotas(s.ci)).filter(p=>p!==null);
+  const aprobados=promedios.filter(p=>p>=PASS_MIN).length;
+  const pendTareas=tareas.filter(t=>t.nota===undefined).length;
+
+  document.getElementById('docente-stats').innerHTML=`
+    <div class="stat-tile"><span class="stat-v">${students.length}</span><div class="stat-l">Estudiantes</div></div>
+    <div class="stat-tile"><span class="stat-v" style="color:var(--green)">${aprobados}</span><div class="stat-l">Aprobados</div></div>
+    <div class="stat-tile"><span class="stat-v">${tareas.length}</span><div class="stat-l">Tareas recibidas</div></div>
+    <div class="stat-tile"><span class="stat-v" style="color:var(--gold2)">${pendTareas}</span><div class="stat-l">Tareas por calificar</div></div>
+  `;
+}
+
+// ════════════════════════════════════════════════════════
+//  DOCENTE: ESTUDIANTES
+// ════════════════════════════════════════════════════════
+function renderEstudiantes(){
+  const q=(document.getElementById('search-est')?.value||'').toLowerCase();
+  const students=getStudents().filter(s=>
+    s.name.toLowerCase().includes(q)||s.ci.includes(q)
+  );
+  const el=document.getElementById('lista-estudiantes');
+  if(!students.length){ el.innerHTML='<div class="empty"><span class="empty-icon">👤</span><div class="empty-txt">No hay estudiantes registrados.</div></div>'; return; }
+
+  el.innerHTML=students.map(s=>{
+    const prom=promedioNotas(s.ci);
+    const promStr=prom!==null?prom.toFixed(1)+'%':'—';
+    const cls=prom===null?'empty':prom>=PASS_MIN?'pass':'fail';
+    const notasObj=getNotas()[s.ci]||{};
+    const rendidos=Object.keys(notasObj).length;
+    const initials=s.name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+
+    // Quiz pills
+    let pills='';
+    for(let q=1;q<=10;q++){
+      const nota=getNota(s.ci,q);
+      const pc=nota===undefined?'empty':nota>=PASS_MIN?'pass':'fail';
+      pills+=`<span class="nota-pill ${pc}" style="margin:.15rem">${nota===undefined?'—':nota.toFixed(0)}</span>`;
+    }
+
+    return `<div class="student-row-teacher" onclick="toggleStudentDetail(this)">
+      <div class="str-top">
+        <div class="str-avatar">${initials}</div>
+        <div>
+          <div class="str-name">${s.name}</div>
+          <div class="str-meta">CI: ${s.ci} · ${rendidos}/10 quizzes · desde ${s.added}</div>
+        </div>
+        <div class="str-nota ${cls}">${promStr}</div>
+      </div>
+      <div class="str-detail">
+        <div style="font-size:.7rem;color:var(--muted);margin-bottom:.4rem;letter-spacing:.06em">NOTAS Q1–Q10:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.1rem;margin-bottom:.8rem">${pills}</div>
+        <div class="btn-row">
+          <button class="btn sm primary" onclick="event.stopPropagation();openEditNotas('${s.ci}','${s.name}')">✏️ Editar notas</button>
+          <button class="btn sm danger" onclick="event.stopPropagation();deleteStudent('${s.ci}')">🗑 Eliminar</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleStudentDetail(el){
+  const d=el.querySelector('.str-detail');
+  d.classList.toggle('open');
+}
+
+function deleteStudent(ci){
+  if(!confirm('¿Eliminar este estudiante y todas sus notas?')) return;
+  saveStudents(getStudents().filter(s=>s.ci!==ci));
+  const n=getNotas(); delete n[ci]; save(K_NOTAS,n);
+  renderEstudiantes(); renderDocenteStats();
+}
+
+function openAddStudent(){
+  document.getElementById('new-st-name').value='';
+  document.getElementById('new-st-ci').value='';
+  document.getElementById('add-st-msg').className='msg';
+  document.getElementById('modal-add-student').classList.remove('hidden');
+}
+
+function addStudent(){
+  const name=document.getElementById('new-st-name').value.trim();
+  const ci=document.getElementById('new-st-ci').value.trim();
+  const msg=document.getElementById('add-st-msg');
+  if(!name||!ci){ msg.className='msg err'; msg.textContent='⚠ Completa ambos campos.'; return; }
+  if(!addStudentDB(name,ci)){ msg.className='msg err'; msg.textContent='⚠ Ya existe un estudiante con ese CI.'; return; }
+  closeModal('modal-add-student');
+  renderEstudiantes(); renderDocenteStats();
+}
+
+// ════════════════════════════════════════════════════════
+//  DOCENTE: EDITAR NOTAS (modal inline)
+// ════════════════════════════════════════════════════════
+let editCI=null;
+
+function openEditNotas(ci,name){
+  editCI=ci;
+  // Build inline form inside a new modal dynamically
+  let rows='';
+  for(let q=1;q<=10;q++){
+    const nota=getNota(ci,q);
+    const val=nota!==undefined?nota:'';
+    rows+=`<div class="nota-row">
+      <span class="qz-tag">Q${q}</span>
+      <span class="qz-name">${QUIZ_NAMES[q]}</span>
+      <input class="nota-inp" id="enota-${q}" type="number" min="0" max="100"
+        value="${val}" placeholder="—"
+        onchange="liveNota(this,${q})"
+        onkeydown="if(event.key==='Enter')liveNota(this,${q})">
+      <span class="nota-state ${nota===undefined?'vacio':nota>=PASS_MIN?'aprobado':'reprobado'}" id="enota-state-${q}">
+        ${nota===undefined?'—':nota>=PASS_MIN?'Aprobado':'Reprobado'}
+      </span>
+      <button class="nota-del" onclick="clearNota(${q})" title="Borrar">×</button>
+    </div>`;
+  }
+
+  // Create or reuse modal
+  let m=document.getElementById('modal-edit-notas');
+  if(!m){
+    m=document.createElement('div');
+    m.className='modal-overlay'; m.id='modal-edit-notas';
+    m.innerHTML=`<div class="modal" style="width:min(96vw,620px)">
+      <button class="modal-close" onclick="closeModal('modal-edit-notas')">✕</button>
+      <div class="modal-title" id="men-title"></div>
+      <div id="men-rows"></div>
+      <div style="padding:.7rem 0;font-size:.75rem;color:var(--muted)">
+        Promedio: <strong id="men-prom" style="color:var(--navy)">—</strong>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" onclick="closeModal('modal-edit-notas');renderEstudiantes();renderDocenteStats();">✓ Guardar y cerrar</button>
+      </div>
+    </div>`;
+    document.body.appendChild(m);
+  }
+  document.getElementById('men-title').textContent=`✏️ Notas de ${name} (CI: ${ci})`;
+  document.getElementById('men-rows').innerHTML=rows;
+  updatePromModal();
+  m.classList.remove('hidden');
+}
+
+function liveNota(inp,q){
+  const val=inp.value.trim();
+  setNota(editCI,q,val===''?null:parseFloat(val));
+  const nota=getNota(editCI,q);
+  const st=document.getElementById('enota-state-'+q);
+  if(nota===undefined){ st.className='nota-state vacio'; st.textContent='—'; }
+  else if(nota>=PASS_MIN){ st.className='nota-state aprobado'; st.textContent='Aprobado'; }
+  else { st.className='nota-state reprobado'; st.textContent='Reprobado'; }
+  updatePromModal();
+}
+
+function clearNota(q){
+  setNota(editCI,q,null);
+  document.getElementById('enota-'+q).value='';
+  const st=document.getElementById('enota-state-'+q);
+  st.className='nota-state vacio'; st.textContent='—';
+  updatePromModal();
+}
+
+function updatePromModal(){
+  const p=promedioNotas(editCI);
+  const el=document.getElementById('men-prom');
+  if(!el) return;
+  el.textContent=p!==null?p.toFixed(1)+'%':'—';
+  el.style.color=p===null?'var(--muted)':p>=PASS_MIN?'var(--green)':'var(--red)';
+}
+
+// ════════════════════════════════════════════════════════
+//  DOCENTE: NOTAS MASIVO
+// ════════════════════════════════════════════════════════
+function renderNotasMasivo(){
+  const q=(document.getElementById('search-notas')?.value||'').toLowerCase();
+  const students=getStudents().filter(s=>
+    s.name.toLowerCase().includes(q)||s.ci.includes(q)
+  );
+  const el=document.getElementById('lista-notas-masivo');
+  if(!students.length){ el.innerHTML='<div class="empty"><span class="empty-icon">✏️</span><div class="empty-txt">Agrega estudiantes primero.</div></div>'; return; }
+
+  el.innerHTML=students.map(s=>{
+    let qcols='';
+    for(let q=1;q<=10;q++){
+      const nota=getNota(s.ci,q);
+      qcols+=`<td><input class="nota-inp" type="number" min="0" max="100"
+        value="${nota!==undefined?nota:''}" placeholder="—"
+        style="width:52px"
+        onchange="setNota('${s.ci}',${q},this.value===''?null:parseFloat(this.value));renderDocenteStats();"
+        onkeydown="if(event.key==='Enter'){setNota('${s.ci}',${q},this.value===''?null:parseFloat(this.value));this.blur();}">
+      </td>`;
+    }
+    const prom=promedioNotas(s.ci);
+    const promStr=prom!==null?prom.toFixed(1):'—';
+    const cls=prom===null?'empty':prom>=PASS_MIN?'pass':'fail';
+    return `<tr>
+      <td>${s.name}<br><span style="font-size:.65rem;color:var(--muted)">${s.ci}</span></td>
+      ${qcols}
+      <td><span class="nota-pill ${cls}">${promStr}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Wrap in scrollable table
+  el.innerHTML=`<div style="overflow-x:auto"><table class="tabla-notas">
+    <thead><tr><th style="min-width:160px">Estudiante</th>
+    ${[...Array(10)].map((_,i)=>`<th>Q${i+1}</th>`).join('')}
+    <th>Prom</th></tr></thead>
+    <tbody>${el.innerHTML}</tbody>
+  </table></div>`;
+}
+
+// ════════════════════════════════════════════════════════
+//  DOCENTE: TAREAS
+// ════════════════════════════════════════════════════════
+let currentTareaId=null;
+
+function renderTareas(){
+  const q=(document.getElementById('search-tar')?.value||'').toLowerCase();
+  const ft=document.getElementById('filter-tar')?.value||'';
+  let tareas=getTareas().filter(t=>
+    (t.name.toLowerCase().includes(q)||t.ci.includes(q)||t.tarea.toLowerCase().includes(q)) &&
+    (!ft||t.tarea===ft)
+  ).slice().reverse();
+
+  const el=document.getElementById('lista-tareas');
+  if(!tareas.length){ el.innerHTML='<div class="empty"><span class="empty-icon">📭</span><div class="empty-txt">No hay tareas entregadas.</div></div>'; return; }
+
+  el.innerHTML=tareas.map(t=>{
+    const notaStr=t.nota!==undefined?t.nota.toFixed(1)+'%':'Pendiente';
+    const cls=t.nota===undefined?'pending':t.nota>=PASS_MIN?'pass':'fail';
+    const icon=t.type==='pdf'?'📄':'🐍';
+    return `<div class="tarea-card">
+      <span class="tarea-icon">${icon}</span>
+      <div class="tarea-info">
+        <div class="tarea-name">${t.tarea} · ${t.name}</div>
+        <div class="tarea-meta">CI: ${t.ci} · ${t.filename} · ${t.date}</div>
+        ${t.comentario?`<div class="tarea-meta" style="color:var(--navy)">💬 ${t.comentario}</div>`:''}
+      </div>
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <div class="tarea-nota ${cls}">${notaStr}</div>
+        <button class="btn sm primary" onclick="openCalificarTarea('${t.id}')">✏️</button>
+        <button class="btn sm" onclick="downloadFile('${t.id}','${t.filename}')">⬇</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openCalificarTarea(id){
+  currentTareaId=id;
+  const tareas=getTareas();
+  const t=tareas.find(t=>t.id===id); if(!t) return;
+  document.getElementById('mct-title').textContent=`Calificar: ${t.tarea} · ${t.name}`;
+  document.getElementById('mct-nota').value=t.nota!==undefined?t.nota:'';
+  document.getElementById('mct-comentario').value=t.comentario||'';
+  const fEl=document.getElementById('mct-files');
+  fEl.innerHTML=`<div class="file-item">
+    <span class="file-icon">${t.type==='pdf'?'📄':'🐍'}</span>
+    <span class="file-name">${t.filename}</span>
+    <button class="btn sm" onclick="downloadFile('${t.id}','${t.filename}')">⬇ Descargar</button>
+  </div>`;
+  document.getElementById('modal-calificar-tarea').classList.remove('hidden');
+}
+
+function saveTareaNota(){
+  const nota=parseFloat(document.getElementById('mct-nota').value);
+  const com=document.getElementById('mct-comentario').value.trim();
+  if(isNaN(nota)||nota<0||nota>100){ alert('Ingresa una nota entre 0 y 100.'); return; }
+  const tareas=getTareas();
+  const idx=tareas.findIndex(t=>t.id===currentTareaId);
+  if(idx>-1){ tareas[idx].nota=nota; tareas[idx].comentario=com; saveTareas(tareas); }
+  closeModal('modal-calificar-tarea');
+  renderTareas(); renderDocenteStats();
+}
+
+function downloadFile(id,name){
+  const f=getFile(id);
+  if(!f){ alert('Archivo no disponible (almacenamiento del navegador).'); return; }
+  const a=document.createElement('a'); a.href=f.data; a.download=name; a.click();
+}
+
+// ════════════════════════════════════════════════════════
+//  EXPORT CSV
+// ════════════════════════════════════════════════════════
+function exportAll(){
+  const students=getStudents();
+  const qHeaders=[...Array(10)].map((_,i)=>`Q${i+1}`).join(',');
+  const rows=students.map(s=>{
+    const notasRow=[...Array(10)].map((_,i)=>{
+      const n=getNota(s.ci,i+1); return n!==undefined?n.toFixed(1):'';
+    }).join(',');
+    const prom=promedioNotas(s.ci);
+    const estado=prom===null?'Sin notas':prom>=PASS_MIN?'APROBADO':'REPROBADO';
+    return `"${s.name}","${s.ci}",${notasRow},${prom!==null?prom.toFixed(1):''},"${estado}"`;
+  });
+  const csv=`Nombre,CI,${qHeaders},Promedio,Estado\n${rows.join('\n')}`;
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`notas_analisis_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function exportMisPDF(){
+  const ci=document.getElementById('st-ci').value.trim();
+  const name=document.getElementById('st-name').value.trim();
+  if(!ci||!name){ alert('Ingresa tus datos primero.'); return; }
+  const notasRow=[...Array(10)].map((_,i)=>{
+    const n=getNota(ci,i+1);
+    return `${QUIZ_NAMES[i+1]},${n!==undefined?n.toFixed(1):'Pendiente'}`;
+  }).join('\n');
+  const prom=promedioNotas(ci);
+  const csv=`Reporte de Notas - Análisis Numérico 2026\nEstudiante: ${name}\nCI: ${ci}\n\nQuiz,Nota\n${notasRow}\n\nPromedio General: ${prom!==null?prom.toFixed(1)+'%':'—'}`;
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`mis_notas_${ci}.csv`; a.click();
+}
+
+// ════════════════════════════════════════════════════════
+//  MISC
+// ════════════════════════════════════════════════════════
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
+
+function openModal(id){ document.getElementById(id).classList.remove('hidden'); }
+
+// Reveal teacher tab to anyone who knows (no spoilers in UI)
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey&&e.shiftKey&&e.key==='D'){
+    document.getElementById('tab-docente').style.display='';
+  }
+});
+
+// Init
+window.addEventListener('load',()=>{
+  // Populate students tab silently
+  renderMisEntregas();
+});
+</script>
 </body>
 </html>
